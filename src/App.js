@@ -19,6 +19,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ManufAutocomplete from "./ManufAutocomplete";
 import ModelsSelect from "./ModelsSelect";
 import {useState} from "react";
+import TodoList from "./components/TodoList";
 
 function Copyright(props) {
     return (
@@ -77,9 +78,9 @@ export default function SignUp() {
                             <Grid item xs={12}>
                                 <ModelsSelect selectedManufacturers={selectedManufacturers} />
                             </Grid>
-                            <Grid item xs={12}>
-                                <ModelsSelect selectedManufacturers={selectedManufacturers} />
-                            </Grid>
+                            {/*<Grid item xs={12}>*/}
+                            {/*    <ModelsSelect selectedManufacturers={selectedManufacturers} />*/}
+                            {/*</Grid>*/}
                             <Grid item xs={6}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DatePicker
@@ -99,18 +100,6 @@ export default function SignUp() {
                                 </LocalizationProvider>
                             </Grid>
                             <Grid item xs={12}>
-
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="password"
-                                    label="Password"
-                                    type="password"
-                                    id="password"
-                                    autoComplete="new-password"
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
                                 <FormControlLabel
                                     control={<Checkbox value="allowExtraEmails" color="primary" />}
                                     label="I want to receive inspiration, marketing promotions and updates via email."
@@ -125,15 +114,12 @@ export default function SignUp() {
                         >
                             צור קיטריון לקבלת התראות
                         </Button>
-                        <Grid container justifyContent="flex-end">
-                            <Grid item>
-                                <Link href="#" variant="body2">
-                                    Already have an account? Sign in
-                                </Link>
-                            </Grid>
-                        </Grid>
-                    </Box>
+                            <Typography component="h1" variant="h5">
+                                TODO List
+                            </Typography>
                 </Box>
+                </Box>
+                <TodoList />
                 <Copyright sx={{ mt: 5 }} />
             </Container>
         </ThemeProvider>

@@ -67,4 +67,4 @@ const ModelsSelect = ({selectedManufacturers}) => {
     )
 }
 
-export default ManufAutocomplete;
+export default ModelsSelect;

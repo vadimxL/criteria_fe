@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
-import {FormControl, TextField} from "@mui/material";
+import {TextField} from "@mui/material";
 
 const API_URL = 'http://127.0.0.1:8000/manufacturers';
 
