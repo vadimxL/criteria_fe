@@ -4,15 +4,17 @@ import {TextField} from "@mui/material";
 
 const API_URL = 'http://127.0.0.1:8000/manufacturers';
 
-const ManufAutocomplete = ({ selectedManufacturers, setSelectedManufacturers }) => {
+const ManufAutocomplete = ({setManufs}) => {
     const [options, setOptions] = useState([]);
 
 
     const handleChange = (event, item) => {
-        setSelectedManufacturers(item.value);
-        if (!item) return;
-        console.log(item.value)
-        // fetchModels(item.value).then(r => console.log('Models fetched'));
+        if (!item) {
+            setManufs([]);
+            return;
+        }
+        console.log("selected manufacturer:" + item.value)
+        setManufs(item.value);
     };
 
     useEffect(() => {

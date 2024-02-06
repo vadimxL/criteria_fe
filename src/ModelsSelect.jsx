@@ -1,7 +1,10 @@
 import {Box, FormControl, InputLabel, MenuItem, Select} from "@mui/material";
 import Chip from "@mui/material/Chip";
-import React, {useState} from "react";
-import ManufAutocomplete from "./ManufAutocomplete";
+import React, {useEffect, useState} from "react";
+import {
+    useQuery,
+} from '@tanstack/react-query'
+
 
 const MODEL_API_URL = 'http://127.0.0.1:8000/models/';
 
@@ -16,27 +19,25 @@ const MenuProps = {
     },
 };
 
-const ModelsSelect = ({selectedManufacturers}) => {
-    const [models, setModels] = useState([]);
+const ModelsSelect = ({manufacturer}) => {
     const [selectedModels, setSelectedModels] = useState([]);
-    const [loadingModels, setLoadingModels] = useState(false);
 
-    const fetchModels = async () => {
-        try {
-            setLoadingModels(true);
-            const response = await fetch(MODEL_API_URL + selectedManufacturers);
-            if (!response.ok) {
-                throw new Error('Failed to fetch options');
-            }
-            const jsonData = await response.json();
-            setModels(jsonData);
-        } catch (error) {
-            console.error('Error fetching options:', error);
-        } finally {
-            console.log(models)
-            setLoadingModels(false);
-        }
-    }
+    console.log("selected manufs: " + manufacturer)
+
+    const { isPending, error, data } = useQuery({
+        queryKey: ['repoData', manufacturer],
+        queryFn: () =>
+            fetch(MODEL_API_URL + manufacturer).then((res) =>
+                res.json(),
+            ),
+
+    })
+    useEffect(() => {
+            setSelectedModels([]);
+    }, [manufacturer]);
+
+    if (isPending) return 'Loading...'
+    if (error) return 'An error has occurred: ' + error.message
 
     return (
         <FormControl sx={{m: 1, width: 300}}>
@@ -45,6 +46,7 @@ const ModelsSelect = ({selectedManufacturers}) => {
                 labelId="select-model"
                 id="select-model"
                 multiple
+                isLoading={isPending}
                 onChange={(event) => setSelectedModels(event.target.value)}
                 renderValue={(selected) => (
                     <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
@@ -57,11 +59,17 @@ const ModelsSelect = ({selectedManufacturers}) => {
                 label="Model"
                 MenuProps={MenuProps}
             >
-                {models.map((model) => (
-                    <MenuItem key={model.value} value={model.text}>
-                        {model.text}
+                {Array.isArray(data) ? (
+                    data.map((item) => (
+                        <MenuItem key={item.value} value={item.text}>
+                            {item.text}
+                        </MenuItem>
+                    ))
+                ) : (
+                    <MenuItem key={1} value={"No models"}>
+                        No models
                     </MenuItem>
-                ))}
+                )}
             </Select>
         </FormControl>
     )
