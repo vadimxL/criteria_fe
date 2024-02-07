@@ -16,8 +16,8 @@ import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
-import ManufAutocomplete from "./ManufAutocomplete";
-import ModelsSelect from "./ModelsSelect";
+import Manufacturers from "./Manufacturers";
+import Models from "./Models";
 import {useEffect, useState} from "react";
 import TodoList from "./components/TodoList";
 import {
@@ -58,9 +58,9 @@ export default function SignUp() {
 
     }, []);
 
-    const handleManufChange = (event, newValue) => {
-        console.log('**selected mwnu', newValue, event);
-        setSelectedManufacturers(event);
+    const  handleManufSelect = (newValues) => {
+        console.log('**selected manufacturers: ', newValues);
+        setSelectedManufacturers(newValues);
     }
 
     return (
@@ -85,10 +85,10 @@ export default function SignUp() {
                         <Box component="form" noValidate onSubmit={handleSubmit} sx={{mt: 3}}>
                             <Grid container spacing={2}>
                                 <Grid item xs={12}>
-                                    <ManufAutocomplete setManufs={handleManufChange}/>
+                                    <Manufacturers setManufs={handleManufSelect}/>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <ModelsSelect manufacturer={selectedManufacturers} />
+                                    <Models manufacturers={selectedManufacturers} />
                                 </Grid>
                                 <Grid item xs={6}>
                                     <LocalizationProvider dateAdapter={AdapterDayjs}>
