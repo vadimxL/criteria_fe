@@ -10,25 +10,15 @@ const MODEL_API_URL = 'http://127.0.0.1:8000/models/';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
-        },
-    },
-};
 
-const Models = ({manufacturers}) => {
+const Models = ({manufacturers, setModels}) => {
     const [selectedModels, setSelectedModels] = useState([]);
 
-    // const { isPending, error, data } = useQuery({
-    //     queryKey: ['models'],
-    //     queryFn: () =>
-    //         fetch(MODEL_API_URL + manufacturers).then((res) =>
-    //             res.json(),
-    //         ),
-    // })
+    const onModels = (event) => {
+        console.log("Event: " + event.target.value)
+        setSelectedModels(event.target.value);
+        setModels(event.target.value);
+    }
 
     console.log("Manufacturers: " + manufacturers)
     const results = useQueries({
@@ -72,21 +62,14 @@ const Models = ({manufacturers}) => {
 
     console.log("Grouped items: " + JSON.stringify(groupedItems))
 
-    // return <span>Models</span>
-
-    // if (isPending) return 'Loading...'
-    // if (error) return 'An error has occurred: ' + error.message
-
     return (
-        <FormControl sx={{m: 1, width: 300}}>
-            <InputLabel id="select-model-label">Model</InputLabel>
+        <FormControl fullWidth>
+            <InputLabel>Model</InputLabel>
             <Select
-                labelId="select-model"
-                id="select-model"
                 multiple
-                onChange={(event) => setSelectedModels(event.target.value)}
+                onChange={(e) => onModels(e)}
                 renderValue={(selected) => (
-                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
+                    <Box>
                         {selected.map((value) => (
                             <Chip key={value} label={value}/>
                         ))}
@@ -94,7 +77,6 @@ const Models = ({manufacturers}) => {
                 )}
                 value={selectedModels}
                 label="Model"
-                MenuProps={MenuProps}
             >
                 {Object.keys(groupedItems).length > 0 ? (
                     [].concat(

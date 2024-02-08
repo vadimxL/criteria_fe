@@ -1,29 +1,19 @@
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
+import {useEffect, useState} from 'react';
+import axios from 'axios';
+
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import {green, pink} from '@mui/material/colors';
-import PageviewIcon from '@mui/icons-material/Pageview';
-import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
-import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
-import Manufacturers from "./Manufacturers";
-import Models from "./Models";
-import {useEffect, useState} from "react";
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import * as PropTypes from "prop-types";
+import CriteriaForm from "./components/CriteriaForm";
 import TodoList from "./components/TodoList";
-import {
-    QueryClient,
-    QueryClientProvider,
-} from '@tanstack/react-query'
+import AdvancedOptions from "./components/AdvancedOptions";
+const CREATE_TASK_URL = 'http://127.0.0.1:8000/items';
 
 function Copyright(props) {
     return (
@@ -43,24 +33,74 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 const queryClient = new QueryClient()
 
+CriteriaForm.propTypes = {
+    onSubmit: PropTypes.func,
+    manufs: PropTypes.func,
+    manufacturers: PropTypes.arrayOf(PropTypes.any),
+    models: PropTypes.func,
+    renderInput: PropTypes.func
+};
 export default function SignUp() {
     const [selectedManufacturers, setSelectedManufacturers] = useState([]);
+    const [selectedModels, setSelectedModels] = useState([]);
+    const [todos, setTodos] = useState([]);
 
-    const handleSubmit = (event) => {
+    const fetchTodos = () => {
+        fetch("http://localhost:8000/items")
+            .then((r) => r.json())
+            .then((items) => setTodos(items));
+    }
+
+    console.log("Fetching todos...." + todos);
+    useEffect(() => {
+        fetchTodos();
+    }, []);
+
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log({
+
+        const requestData = {
+            id: todos.length + 1,
             email: data.get('email'),
-            password: data.get('password'),
-        });
+            manufacturers: selectedManufacturers.map((manufs) => manufs.value),
+            models: selectedModels.map((models) => models),
+            year_range: {"min": data.get('start_year'), "max": data.get('end_year')},
+            mileage_range: {"min": 0, "max": 100000},
+            price_range: {"min": 0, "max": 100000},
+        };
+
+        console.log(requestData);
+
+        try {
+            const response = await axios.post(CREATE_TASK_URL, requestData);
+
+            // Handle the response as needed
+            console.log(response.data);
+            fetchTodos();
+        } catch (error) {
+            // Handle errors
+            console.error('Error sending PUT request:', error);
+        }
+
     };
     useEffect(() => {
 
     }, []);
 
+    const handleSetTodos = (newValues) => {
+        console.log("**selected todos...." + todos);
+        setTodos(newValues);
+    }
+
     const  handleManufSelect = (newValues) => {
         console.log('**selected manufacturers: ', newValues);
         setSelectedManufacturers(newValues);
+    }
+
+    const handleModelSelect = (newValues) => {
+        console.log('**selected models: ', newValues);
+        setSelectedModels(newValues);
     }
 
     return (
@@ -68,67 +108,12 @@ export default function SignUp() {
             <ThemeProvider theme={defaultTheme}>
                 <Container component="main" maxWidth="xs">
                     <CssBaseline/>
-                    <Box
-                        sx={{
-                            marginTop: 8,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Avatar sx={{bgcolor: pink[500]}}>
-                            <PageviewIcon/>
-                        </Avatar>
-                        <Typography component="h1" variant="h5">
-                            יצירת קריטריון
-                        </Typography>
-                        <Box component="form" noValidate onSubmit={handleSubmit} sx={{mt: 3}}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12}>
-                                    <Manufacturers setManufs={handleManufSelect}/>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Models manufacturers={selectedManufacturers} />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                            label="Start year"
-                                            views={['year']}
-                                            renderInput={(params) => <TextField {...params} />}
-                                        />
-                                    </LocalizationProvider>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                            label="End year"
-                                            views={['year']}
-                                            renderInput={(params) => <TextField {...params} />}
-                                        />
-                                    </LocalizationProvider>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <FormControlLabel
-                                        control={<Checkbox value="allowExtraEmails" color="primary"/>}
-                                        label="I want to receive inspiration, marketing promotions and updates via email."
-                                    />
-                                </Grid>
-                            </Grid>
-                            <Button
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                sx={{mt: 3, mb: 2}}
-                            >
-                                צור קיטריון לקבלת התראות
-                            </Button>
-                            <Typography component="h1" variant="h5">
-                                TODO List
-                            </Typography>
-                        </Box>
-                    </Box>
-                    <TodoList/>
+                    <CriteriaForm onSubmit={handleSubmit} manufs={handleManufSelect}
+                                  manufacturers={selectedManufacturers} models={handleModelSelect}
+                                  renderInput={(params) => <TextField {...params} />}/>
+                    {todos.length > 0 ? (<TodoList todos={todos} fetchTodos={fetchTodos}/>) : (
+                        <div> No todos found</div>)}
+                    <AdvancedOptions/>
                     <Copyright sx={{mt: 5}}/>
                 </Container>
             </ThemeProvider>
