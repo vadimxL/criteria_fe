@@ -44,6 +44,15 @@ export default function SignUp() {
     const [selectedManufacturers, setSelectedManufacturers] = useState([]);
     const [selectedModels, setSelectedModels] = useState([]);
     const [todos, setTodos] = useState([]);
+    const [priceRange, setPriceRange] = useState({start_price: '', end_price: '',});
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setPriceRange((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
     const fetchTodos = () => {
         fetch("http://localhost:8000/items")
@@ -66,8 +75,8 @@ export default function SignUp() {
             manufacturers: selectedManufacturers.map((manufs) => manufs.value),
             models: selectedModels.map((models) => models),
             year_range: {"min": data.get('start_year'), "max": data.get('end_year')},
-            mileage_range: {"min": 0, "max": 100000},
-            price_range: {"min": 0, "max": 100000},
+            mileage_range: {"min": "", "max": ""},
+            price_range: {"min": priceRange.start_price, "max": priceRange.end_price},
         };
 
         console.log(requestData);
@@ -114,6 +123,18 @@ export default function SignUp() {
                     {todos.length > 0 ? (<TodoList todos={todos} fetchTodos={fetchTodos}/>) : (
                         <div> No todos found</div>)}
                     <AdvancedOptions/>
+                    <div className="ui divider"></div>
+                    <label>מחיר</label>
+                    <div className="two fields">
+                        <span className="field">
+                            <input type="number" step="1000" min="0" max="150000" name="start_price"
+                                   placeholder="כל מחיר" value={priceRange.start_price} onChange={handleInputChange}/>
+                        </span>
+                        <span className="field">
+                            <input type="number" step="1000" min="0" max="150000" name="end_price"
+                                   placeholder="כל מחיר" value={priceRange.end_price} onChange={handleInputChange}/>
+                        </span>
+                    </div>
                     <Copyright sx={{mt: 5}}/>
                 </Container>
             </ThemeProvider>
