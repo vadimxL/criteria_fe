@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import axios from 'axios';
+import { createContext } from 'react';
 
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -11,8 +12,9 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import * as PropTypes from "prop-types";
 import CriteriaForm from "./components/CriteriaForm";
-import TodoList from "./components/TodoList";
+import Tasks from "./components/Tasks";
 import AdvancedOptions from "./components/AdvancedOptions";
+import CreateTask from "./components/CreateTask";
 const CREATE_TASK_URL = 'http://127.0.0.1:8000/items';
 
 function Copyright(props) {
@@ -43,7 +45,7 @@ CriteriaForm.propTypes = {
 export default function SignUp() {
     const [selectedManufacturers, setSelectedManufacturers] = useState([]);
     const [selectedModels, setSelectedModels] = useState([]);
-    const [todos, setTodos] = useState([]);
+    const [tasks, setTasks] = useState([]);
     const [priceRange, setPriceRange] = useState({start_price: '', end_price: '',});
 
     const handleInputChange = (e) => {
@@ -55,12 +57,12 @@ export default function SignUp() {
     };
 
     const fetchTodos = () => {
-        fetch("http://localhost:8000/items")
+        fetch("http://localhost:8000/tasks")
             .then((r) => r.json())
-            .then((items) => setTodos(items));
+            .then((items) => setTasks(items));
     }
 
-    console.log("Fetching todos...." + todos);
+    console.log("Fetching tasks...." + tasks);
     useEffect(() => {
         fetchTodos();
     }, []);
@@ -70,7 +72,7 @@ export default function SignUp() {
         const data = new FormData(event.currentTarget);
 
         const requestData = {
-            id: todos.length + 1,
+            id: tasks.length + 1,
             email: data.get('email'),
             manufacturers: selectedManufacturers.map((manufs) => manufs.value),
             models: selectedModels.map((models) => models),
@@ -98,8 +100,8 @@ export default function SignUp() {
     }, []);
 
     const handleSetTodos = (newValues) => {
-        console.log("**selected todos...." + todos);
-        setTodos(newValues);
+        console.log("**selected tasks...." + tasks);
+        setTasks(newValues);
     }
 
     const  handleManufSelect = (newValues) => {
@@ -112,7 +114,17 @@ export default function SignUp() {
         setSelectedModels(newValues);
     }
 
+    const ManufacturersContext = createContext(  [{
+            "text": "קופרה",
+            "value": "92"
+        },
+        {
+            "text": "קיה",
+            "value": "48"
+        }]);
+
     return (
+        <ManufacturersContext.Provider value={selectedManufacturers}>
         <QueryClientProvider client={queryClient}>
             <ThemeProvider theme={defaultTheme}>
                 <Container component="main" maxWidth="xs">
@@ -120,9 +132,10 @@ export default function SignUp() {
                     <CriteriaForm onSubmit={handleSubmit} manufs={handleManufSelect}
                                   manufacturers={selectedManufacturers} models={handleModelSelect}
                                   renderInput={(params) => <TextField {...params} />}/>
-                    {todos.length > 0 ? (<TodoList todos={todos} fetchTodos={fetchTodos}/>) : (
+                    {tasks.length > 0 ? (<Tasks todos={tasks} fetchTodos={fetchTodos}/>) : (
                         <div> No todos found</div>)}
                     <AdvancedOptions/>
+                    <CreateTask/>
                     <div className="ui divider"></div>
                     <label>מחיר</label>
                     <div className="two fields">
@@ -139,5 +152,6 @@ export default function SignUp() {
                 </Container>
             </ThemeProvider>
         </QueryClientProvider>
+        </ManufacturersContext.Provider>
     );
 }
