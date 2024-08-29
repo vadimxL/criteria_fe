@@ -1,102 +1,66 @@
-import {Box, CircularProgress, FormControl, InputLabel, ListSubheader, MenuItem, Select} from "@mui/material";
+import {
+    Stack,
+    TextField
+} from "@mui/material";
 import Chip from "@mui/material/Chip";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {
     useQueries,
 } from '@tanstack/react-query'
+import {ManufacturersContext, SelectedManufacturersContext, SelectedModelsContext} from "../App";
+import Autocomplete from "@mui/material/Autocomplete";
 
 
 const MODEL_API_URL = 'http://127.0.0.1:8000/models/';
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
 
-const Models = ({manufacturers, setModels}) => {
-    const [selectedModels, setSelectedModels] = useState([]);
+const Models = () => {
+    const [models, setModels] = useState([]);
 
-    const onModels = (event) => {
-        console.log("Event: " + event.target.value)
-        setSelectedModels(event.target.value);
-        setModels(event.target.value);
+    const {selectedManufacturers, setSelectedManufacturers} = useContext(SelectedManufacturersContext);
+    const {selectedModels, setSelectedModels} = useContext(SelectedModelsContext);
+
+    const fetchModels = () => {
+        fetch(MODEL_API_URL + selectedManufacturers)
+            .then((r) => r.json())
+            .then((model) => setModels(model));
     }
 
-    console.log("Manufacturers: " + manufacturers)
-    const results = useQueries({
-        queries: manufacturers.map((manufacturer) => {
-            return {
-                queryKey: ['models', manufacturer],
-                queryFn: () =>
-                    fetch(MODEL_API_URL + manufacturer.value).then((res) =>
-                        res.json(),
-                    ),
-            }
-        })
-    })
+    const handleChange = (event, data) => {
+        console.log("Selected manufacturer.text: ", data);
+        console.log("Selected manufacturer.value: ", data.value);
+        setSelectedModels(data.value);
+    };
 
+    console.log("Fetching models...." + models);
     useEffect(() => {
-            setSelectedModels([]);
-    }, [manufacturers]);
-
-    let items = [].concat(...results.map(({data}) => (data)))
-
-    const isLoading = results.some(result => result.isLoading)
-
-    if (isLoading) return <CircularProgress/>
-
-    console.log("Items: " + JSON.stringify(items))
-
-    const groupedItems = items.reduce((acc, item) => {
-        const breadcrumbKey = item.breadcrumbs[0];
-
-        if (!acc[breadcrumbKey]) {
-            acc[breadcrumbKey] = [];
-        }
-
-        acc[breadcrumbKey].push({
-            text: item.text,
-            value: item.value
-        });
-
-        return acc;
-    }, {});
-
-    console.log("Grouped items: " + JSON.stringify(groupedItems))
+        fetchModels();
+    }, [selectedManufacturers]);
 
     return (
-        <FormControl fullWidth>
-            <InputLabel>Model</InputLabel>
-            <Select
-                multiple
-                onChange={(e) => onModels(e)}
-                renderValue={(selected) => (
-                    <Box>
-                        {selected.map((value) => (
-                            <Chip key={value} label={value}/>
-                        ))}
-                    </Box>
+        <Stack spacing={2}>
+            <Autocomplete
+                freeSolo
+                id="free-solo-2-demo"
+                disableClearable
+                onChange={handleChange}
+                options={models}
+                getOptionLabel={(models) => models.text}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        label="Search Models"
+                        slotProps={{
+                            input: {
+                                ...params.InputProps,
+                                type: 'search',
+                            },
+                        }}
+                    />
                 )}
-                value={selectedModels}
-                label="Model"
-            >
-                {Object.keys(groupedItems).length > 0 ? (
-                    [].concat(
-                        ...Object.entries(groupedItems).map(([breadcrumb, items]) => [
-                            <ListSubheader key={breadcrumb}>{breadcrumb}</ListSubheader>,
-                            ...items.map((item) => (
-                                <MenuItem key={item.value} value={item.text}>
-                                    {item.text}
-                                </MenuItem>
-                            )),
-                        ])
-                    )
-                ) : (
-                    <MenuItem key={1} value={"No models"}>
-                        No models
-                    </MenuItem>
-                )}
-            </Select>
-        </FormControl>
-    )
+            />
+        </Stack>
+    );
 }
 
 export default Models;

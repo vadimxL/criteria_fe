@@ -34,7 +34,7 @@ export default function CreateTask() {
         }
 
         try {
-            const response = await axios.post("http://localhost:8000/tasks", requestData, config);
+            const response = await axios.post("http://localhost:8000/v2/tasks", requestData, config);
             // Handle the response as needed
             setStatus(response.statusText)
             console.log(response.data);
