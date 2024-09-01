@@ -18,6 +18,7 @@ import Navbar from "../Navbar";
 import dayjs from "dayjs";
 import {InputLabel, MenuItem, Select} from "@mui/material";
 import FormControl from "@mui/material/FormControl";
+import SubModel from "./SubModel";
 
 export default function CriteriaForm(props) {
     const [age, setAge] = React.useState('');
@@ -55,6 +56,9 @@ export default function CriteriaForm(props) {
                     </Grid>
                     <Grid item xs={12}>
                         <Models/>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <SubModel/>
                     </Grid>
                     <Grid item xs={6}>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
